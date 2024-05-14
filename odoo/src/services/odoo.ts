@@ -56,6 +56,15 @@ class OdooService extends TransactionBaseService {
       origin,
     });
   }
+
+  async cancelOrder(id: number) {
+    if (!this.odooClient.uid) {
+      await this.odooClient.connect();
+    }
+    await this.odooClient.update("stock.picking", [id], {
+      state: "cancel",
+    });
+  }
   async findPartner(email, address, city, country, name) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
