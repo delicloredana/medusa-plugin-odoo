@@ -42,10 +42,7 @@
     "medusa-interfaces": "latest",
     "medusa-payment-manual": "latest",
     "medusa-payment-stripe": "latest",
-    "odoo": "^0.4.0",
     "odoo-await": "^3.4.1",
-    "odoo-xmlrpc": "^1.0.8",
-    "odoots": "^0.1.2",
     "prism-react-renderer": "^2.0.4",
     "typeorm": "^0.3.16"
   },
