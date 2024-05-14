@@ -1,6 +1,4 @@
-import {
-  TransactionBaseService,
-} from "@medusajs/medusa";
+import { TransactionBaseService } from "@medusajs/medusa";
 import Odoo from "odoo-await";
 type OdooType = Odoo & { uid?: number };
 class OdooService extends TransactionBaseService {
@@ -41,8 +39,9 @@ class OdooService extends TransactionBaseService {
     locationId: number,
     locationDestId: number,
     pickingTypeId: number,
-    returnId?,
-    origin?
+    partnerId: number,
+    returnId?: number,
+    origin?: string
   ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
@@ -52,9 +51,35 @@ class OdooService extends TransactionBaseService {
       location_dest_id: locationDestId,
       picking_type_id: pickingTypeId,
       move_ids: moves,
+      partner_id: partnerId,
       return_id: returnId,
       origin,
     });
+  }
+  async findPartner(email, address, city, country, name) {
+    if (!this.odooClient.uid) {
+      await this.odooClient.connect();
+    }
+    const partner = await this.odooClient.search("res.partner", [
+      ["email", "=", email],
+    ]);
+    const countryCode = country.toUpperCase();
+    const country_id = await this.odooClient.search("res.country", [
+      ["code", "=", countryCode],
+    ]);
+
+    if (partner.length > 0) {
+      return partner[0];
+    } else {
+      return await this.odooClient.create("res.partner", {
+        email,
+        city,
+        street: address,
+        country_id: country_id[0],
+        name,
+        country_code: countryCode,
+      });
+    }
   }
   async createReturnOrder(moves, locationId, pickingId) {
     if (!this.odooClient.uid) {

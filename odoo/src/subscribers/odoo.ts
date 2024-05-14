@@ -26,7 +26,22 @@ export default async function odooInventoryHandler({
         "shipping_method.shipping_option",
       ],
     });
-    const order = await orderService.retrieve(id, { select: ["metadata"] });
+    const order = await orderService.retrieve(id, {
+      relations: [
+        "items",
+        "customer",
+        "shipping_address",
+        "shipping_methods",
+        "shipping_methods.shipping_option",
+      ],
+    });
+    const partnerId = await odooService.findPartner(
+      order.email,
+      order.shipping_address.address_1,
+      order.shipping_address.city,
+      order.shipping_address.country_code,
+      order.shipping_address.first_name + " " + order.shipping_address.last_name
+    );
     const delivery = (await odooService.getDeliveryOrder(
       order.metadata.picking_id
     )) as any[];
@@ -48,7 +63,8 @@ export default async function odooInventoryHandler({
       5,
       8,
       1,
-      order.metadata?.picking_id,
+      partnerId,
+      order.metadata?.picking_id as number,
       `Return of ${delivery[0].name}`
     );
   } else {
@@ -61,7 +77,17 @@ export default async function odooInventoryHandler({
         "shipping_methods.shipping_option",
       ],
     });
-
+    const name =
+      order.shipping_address.first_name +
+      " " +
+      order.shipping_address.last_name;
+    const partnerId = await odooService.findPartner(
+      order.email,
+      order.shipping_address.address_1,
+      order.shipping_address.city,
+      order.shipping_address.country_code,
+      name
+    );
     for (const item of order.items) {
       const product = (await odooService.getProduct(item.variant_id)) as any;
       const move = await odooService.createMoves(
@@ -72,7 +98,7 @@ export default async function odooInventoryHandler({
       );
       moves.push(move);
     }
-    const pickingId = await odooService.createOrder(moves, 8, 5, 2);
+    const pickingId = await odooService.createOrder(moves, 8, 5, 2, partnerId);
     await orderService.update(order.id, {
       metadata: { picking_id: pickingId },
     });
