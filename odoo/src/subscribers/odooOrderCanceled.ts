@@ -4,7 +4,7 @@ import {
   OrderService,
 } from "@medusajs/medusa";
 import OdooService from "src/services/odoo";
-export default async function odooCanceledHandler({
+export default async function odooOrderCanceledHandler({
   data,
   container,
 }: SubscriberArgs<Record<string, any>>) {
@@ -20,6 +20,6 @@ export default async function odooCanceledHandler({
 export const config: SubscriberConfig = {
   event: [OrderService.Events.CANCELED],
   context: {
-    subscriberId: "odoo-canceled-handler",
+    subscriberId: "odoo-order-canceled-handler",
   },
 };
