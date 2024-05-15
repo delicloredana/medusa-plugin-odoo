@@ -16,7 +16,7 @@ export default async function odooClaimCreatedHandler({
   const { id } = data;
 
   const claim = await claimService.retrieve(id, {
-    select: ["id", "order_id"],
+    select: ["id", "order_id", "type"],
     relations: [
       "additional_items",
       "additional_items.variant",
@@ -58,26 +58,35 @@ export default async function odooClaimCreatedHandler({
     8,
     1,
     partnerId,
-    `Claim for ${delivery[0].name}`,
+    claim.type === "replace"
+      ? `Claim for ${delivery[0].name}`
+      : `Return of ${delivery[0].name}`,
     order.metadata?.picking_id as number
   );
-  const additionalMoves = [];
-  for (const item of claim.additional_items) {
-    const product = (await odooService.getProduct(item.variant_id)) as any;
-    const move = await odooService.createMoves(product.id, item.quantity, 8, 5);
-    additionalMoves.push(move);
+  if (claim.type === "replace") {
+    const additionalMoves = [];
+    for (const item of claim.additional_items) {
+      const product = (await odooService.getProduct(item.variant_id)) as any;
+      const move = await odooService.createMoves(
+        product.id,
+        item.quantity,
+        8,
+        5
+      );
+      additionalMoves.push(move);
+    }
+    const pickingId = await odooService.createOrder(
+      additionalMoves,
+      8,
+      5,
+      2,
+      partnerId,
+      `Claim for ${delivery[0].name}`
+    );
+    await claimService.update(id, {
+      metadata: { picking_id: pickingId },
+    });
   }
-  const pickingId = await odooService.createOrder(
-    additionalMoves,
-    8,
-    5,
-    2,
-    partnerId,
-    `Claim for ${delivery[0].name}`
-  );
-  await claimService.update(id, {
-    metadata: { picking_id: pickingId },
-  });
 }
 
 export const config: SubscriberConfig = {
