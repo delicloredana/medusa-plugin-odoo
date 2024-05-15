@@ -27,23 +27,24 @@ export default async function odooSwapCreatedHandler({
     relations: [
       "additional_items",
       "order",
-      "order.shipping_address",
       "return_order",
       "return_order.items",
       "return_order.items.item",
       "return_order.shipping_method",
       "return_order.shipping_method.shipping_option",
+      "cart",
+      "cart.shipping_address",
     ],
   });
   const order = await orderService.retrieve(swap.order_id);
   const partnerId = await odooService.findPartner(
     swap.order.email,
-    swap.order.shipping_address.address_1,
-    swap.order.shipping_address.city,
-    swap.order.shipping_address.country_code,
-    swap.order.shipping_address.first_name +
+    swap.cart.shipping_address.address_1,
+    swap.cart.shipping_address.city,
+    swap.cart.shipping_address.country_code,
+    swap.cart.shipping_address.first_name +
       " " +
-      swap.order.shipping_address.last_name
+      swap.cart.shipping_address.last_name
   );
   const delivery = (await odooService.getDeliveryOrder(
     order.metadata.picking_id
@@ -88,7 +89,7 @@ export default async function odooSwapCreatedHandler({
 }
 
 export const config: SubscriberConfig = {
-  event: [SwapService.Events.CREATED],
+  event: [SwapService.Events.PAYMENT_COMPLETED],
   context: {
     subscriberId: "odoo-swap-created-handler",
   },
