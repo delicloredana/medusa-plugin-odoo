@@ -40,8 +40,9 @@ class OdooService extends TransactionBaseService {
     locationDestId: number,
     pickingTypeId: number,
     partnerId: number,
-    returnId?: number,
-    origin?: string
+    origin?: string,
+    returnId?: number
+    
   ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
@@ -65,7 +66,8 @@ class OdooService extends TransactionBaseService {
       state: "cancel",
     });
   }
-  async findPartner(email, address, city, country, name) {
+  
+  async findPartner(email: string, address: string, city: string, country: string, name: string) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }

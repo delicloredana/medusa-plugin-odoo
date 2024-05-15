@@ -45,7 +45,6 @@ export default async function odooInventoryHandler({
     const delivery = (await odooService.getDeliveryOrder(
       order.metadata.picking_id
     )) as any[];
-    const returnMoves = [];
     for (const item of returnData.items) {
       const product = (await odooService.getProduct(
         item.item.variant_id
@@ -56,7 +55,6 @@ export default async function odooInventoryHandler({
         delivery[0].move_ids
       );
       moves.push(result.move);
-      returnMoves.push(result.returnMoves);
     }
     await odooService.createOrder(
       moves,
@@ -64,8 +62,9 @@ export default async function odooInventoryHandler({
       8,
       1,
       partnerId,
-      order.metadata?.picking_id as number,
-      `Return of ${delivery[0].name}`
+
+      `Return of ${delivery[0].name}`,
+      order.metadata?.picking_id as number
     );
   } else {
     const order = await orderService.retrieve(id, {
