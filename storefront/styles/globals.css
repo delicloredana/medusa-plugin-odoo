@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-sans font-light antialiased;
+  }
+}
+
+@layer components {
+  /**
+   * Dropdown
+   */
+  .dropdown-trigger {
+    @apply text-start focus-visible:outline-none;
+  }
+
+  .dropdown-content {
+    @apply relative z-dropdown-content max-h-96 overflow-y-auto rounded-sm border border-primary bg-white text-black;
+  }
+
+  .dropdown-item {
+    @apply cursor-pointer px-4 py-4 transition-all hover:bg-primary-100 hover:font-black hover:italic focus-visible:outline-0;
+  }
+
+  .dropdown-full-width {
+    @apply relative;
+
+    & div[data-radix-popper-content-wrapper] {
+      @apply !absolute !bottom-0 w-full data-[state=open]:!bg-primary;
+    }
+
+    & .dropdown-content {
+      @apply border-gray-200 data-[state=open]:border-t-0;
+    }
+  }
+
+  /**
+   * Collapsible
+   */
+  .collapsible-wrapper {
+    @apply overflow-hidden border-b border-gray-200;
+  }
+
+  .collapsible-trigger {
+    @apply flex w-full justify-between gap-2 py-8 text-start font-bold;
+  }
+
+  .collapsible-icon {
+    @apply transition-all;
+
+    [data-state='open'] & {
+      @apply rotate-180;
+    }
+  }
+
+  .collapsible-content {
+    @apply pr-8;
+
+    &[data-state='open'] {
+      animation: collapsibleSlideDown 300ms ease-out;
+    }
+
+    &[data-state='closed'] {
+      animation: collapsibleSlideUp 300ms ease-out;
+    }
+  }
+
+  .collapsible-content-inner {
+    @apply pb-8;
+  }
+}
+
+@layer utilities {
+  .outer-spin-button-none {
+    @apply appearance-none;
+    -moz-appearance: textfield;
+
+    &,
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      @apply appearance-none;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      margin: 0;
+      @apply m-0;
+    }
+  }
+}
+
+@keyframes collapsibleSlideDown {
+  from {
+    @apply h-0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@keyframes collapsibleSlideUp {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    @apply h-0;
+  }
+}
