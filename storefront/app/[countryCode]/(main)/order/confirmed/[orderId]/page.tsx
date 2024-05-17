@@ -9,7 +9,8 @@ const OrderConfirmationPage = async ({
 }: {
   params: { orderId: string; countryCode: string };
 }) => {
-  const order = await retrieveOrder(orderId);
+  const result = await retrieveOrder(orderId);
+  const order = result?.[0];
 
   if (!order) {
     return <p>Loading</p>;

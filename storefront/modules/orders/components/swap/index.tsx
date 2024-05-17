@@ -1,4 +1,4 @@
-import { LineItem, Swap } from '@medusajs/medusa';
+import { Swap } from '@medusajs/medusa';
 
 import React from 'react';
 
@@ -7,7 +7,6 @@ import Image from 'next/image';
 import redTShirtt from '../../../../public/images/content/red-t-shirt.jpg';
 import { Tag } from '@/modules/common/ui/Tag';
 import Link from 'next/link';
-import { getCart } from '@/lib/data';
 
 const SingleSwap = async ({
   swap,
@@ -18,7 +17,6 @@ const SingleSwap = async ({
   currencyCode: string;
   countryCode: string;
 }) => {
-  
   if (swap) {
     return (
       <div>
@@ -106,10 +104,10 @@ const SingleSwap = async ({
           <li className="group relative flex flex-wrap justify-between gap-8">
             <p>Shipping for return: </p>
             <p className="ml-1 text-black">
-             {currencyCode} {(swap.return_order.shipping_method.price / 100).toFixed(2)}
+              {currencyCode}{' '}
+              {(swap.return_order.shipping_method.price / 100).toFixed(2)}
             </p>
           </li>{' '}
-         
           <Link href={`/${countryCode}/swap/${swap.cart_id}`}>
             <Button>Complete swap</Button>
           </Link>
