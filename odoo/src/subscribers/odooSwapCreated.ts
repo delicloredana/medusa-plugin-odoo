@@ -34,17 +34,28 @@ export default async function odooSwapCreatedHandler({
       "return_order.shipping_method.shipping_option",
       "cart",
       "cart.shipping_address",
+      "shipping_address",
     ],
   });
+
   const order = await orderService.retrieve(swap.order_id);
   const partnerId = await odooService.findPartner(
-    swap.order.email,
+    order.email,
     swap.cart.shipping_address.address_1,
     swap.cart.shipping_address.city,
     swap.cart.shipping_address.country_code,
     swap.cart.shipping_address.first_name +
       " " +
-      swap.cart.shipping_address.last_name
+      swap.cart.shipping_address.last_name,
+    swap.shipping_address.postal_code
+  );
+  const address = await odooService.createDeliveryAddress(
+    partnerId,
+    swap.shipping_address.address_1,
+    swap.shipping_address.city,
+    swap.shipping_address.country_code,
+    swap.shipping_address.first_name + " " + swap.shipping_address.last_name,
+    swap.shipping_address.postal_code
   );
   const delivery = (await odooService.getDeliveryOrder(
     order.metadata.picking_id
@@ -80,7 +91,7 @@ export default async function odooSwapCreatedHandler({
     8,
     5,
     2,
-    partnerId,
+    address,
     `Swap for ${delivery[0].name}`
   );
   await swapService.update(id, {

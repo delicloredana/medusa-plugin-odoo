@@ -27,17 +27,27 @@ export default async function odooClaimCreatedHandler({
       "return_order.shipping_method.shipping_option",
       "order",
       "order.shipping_address",
+      "shipping_address",
     ],
   });
   const order = await orderService.retrieve(claim.order_id);
   const partnerId = await odooService.findPartner(
-    claim.order.email,
+    order.email,
     claim.order.shipping_address.address_1,
     claim.order.shipping_address.city,
     claim.order.shipping_address.country_code,
     claim.order.shipping_address.first_name +
       " " +
-      claim.order.shipping_address.last_name
+      claim.order.shipping_address.last_name,
+    claim.shipping_address.postal_code
+  );
+  const address = await odooService.createDeliveryAddress(
+    partnerId,
+    claim.shipping_address.address_1,
+    claim.shipping_address.city,
+    claim.shipping_address.country_code,
+    claim.shipping_address.first_name + " " + claim.shipping_address.last_name,
+    claim.shipping_address.postal_code
   );
   const delivery = (await odooService.getDeliveryOrder(
     order.metadata.picking_id
@@ -80,7 +90,7 @@ export default async function odooClaimCreatedHandler({
       8,
       5,
       2,
-      partnerId,
+      address,
       `Claim for ${delivery[0].name}`
     );
     await claimService.update(id, {

@@ -40,8 +40,12 @@ export default async function odooInventoryHandler({
       order.shipping_address.address_1,
       order.shipping_address.city,
       order.shipping_address.country_code,
-      order.shipping_address.first_name + " " + order.shipping_address.last_name
+      order.shipping_address.first_name +
+        " " +
+        order.shipping_address.last_name,
+      order.shipping_address.postal_code
     );
+
     const delivery = (await odooService.getDeliveryOrder(
       order.metadata.picking_id
     )) as any[];
@@ -85,7 +89,16 @@ export default async function odooInventoryHandler({
       order.shipping_address.address_1,
       order.shipping_address.city,
       order.shipping_address.country_code,
-      name
+      name,
+      order.shipping_address.postal_code
+    );
+    const address = await odooService.createDeliveryAddress(
+      partnerId,
+      order.shipping_address.address_1,
+      order.shipping_address.city,
+      order.shipping_address.country_code,
+      name,
+      order.shipping_address.postal_code
     );
     for (const item of order.items) {
       const product = (await odooService.getProduct(item.variant_id)) as any;
@@ -97,7 +110,7 @@ export default async function odooInventoryHandler({
       );
       moves.push(move);
     }
-    const pickingId = await odooService.createOrder(moves, 8, 5, 2, partnerId);
+    const pickingId = await odooService.createOrder(moves, 8, 5, 2, address);
     await orderService.update(order.id, {
       metadata: { picking_id: pickingId },
     });

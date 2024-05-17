@@ -42,7 +42,6 @@ class OdooService extends TransactionBaseService {
     partnerId: number,
     origin?: string,
     returnId?: number
-    
   ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
@@ -66,14 +65,65 @@ class OdooService extends TransactionBaseService {
       state: "cancel",
     });
   }
-  
-  async findPartner(email: string, address: string, city: string, country: string, name: string) {
+
+  async createDeliveryAddress(
+    parentId: number,
+    address: string,
+    city: string,
+    country: string,
+    name: string,
+    zip: string
+  ) {
+    if (!this.odooClient.uid) {
+      await this.odooClient.connect();
+    }
+    const countryCode = country.toUpperCase();
+    const country_id = await this.odooClient.search("res.country", [
+      ["code", "=", countryCode],
+    ]);
+    const parent = (await this.odooClient.read(
+      "res.partner",
+      parentId
+    )) as any[];
+    const addresses = (await this.odooClient.read(
+      "res.partner",
+      parent[0].child_ids
+    )) as any[];
+
+    const exists = addresses.find((a) => {
+      return a.street === address && a.city === city;
+    });
+
+    if (exists) {
+      return exists.id;
+    }
+    return await this.odooClient.create("res.partner", {
+      type: "delivery",
+      city,
+      street: address,
+      country_id: country_id[0],
+      name,
+      country_code: countryCode,
+      zip,
+      parent_id: parentId,
+    });
+  }
+
+  async findPartner(
+    email: string,
+    address: string,
+    city: string,
+    country: string,
+    name: string,
+    zip:string
+  ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
     const partner = await this.odooClient.search("res.partner", [
       ["email", "=", email],
     ]);
+
     const countryCode = country.toUpperCase();
     const country_id = await this.odooClient.search("res.country", [
       ["code", "=", countryCode],
@@ -89,6 +139,7 @@ class OdooService extends TransactionBaseService {
         country_id: country_id[0],
         name,
         country_code: countryCode,
+        zip
       });
     }
   }
