@@ -78,7 +78,7 @@ class OdooService extends TransactionBaseService {
       await this.odooClient.connect();
     }
     const countryCode = country.toUpperCase();
-    const country_id = await this.odooClient.search("res.country", [
+    const countryId = await this.odooClient.search("res.country", [
       ["code", "=", countryCode],
     ]);
     const parent = (await this.odooClient.read(
@@ -90,18 +90,22 @@ class OdooService extends TransactionBaseService {
       parent[0].child_ids
     )) as any[];
 
-    const exists = addresses.find((a) => {
-      return a.street === address && a.city === city;
+    const existingAddress = addresses.find((a) => {
+      return (
+        a.street === address &&
+        a.city === city &&
+        a.country_code === countryCode
+      );
     });
 
-    if (exists) {
-      return exists.id;
+    if (existingAddress) {
+      return existingAddress.id;
     }
     return await this.odooClient.create("res.partner", {
       type: "delivery",
       city,
       street: address,
-      country_id: country_id[0],
+      country_id: countryId[0],
       name,
       country_code: countryCode,
       zip,
@@ -115,7 +119,7 @@ class OdooService extends TransactionBaseService {
     city: string,
     country: string,
     name: string,
-    zip:string
+    zip: string
   ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
@@ -125,7 +129,7 @@ class OdooService extends TransactionBaseService {
     ]);
 
     const countryCode = country.toUpperCase();
-    const country_id = await this.odooClient.search("res.country", [
+    const countryId = await this.odooClient.search("res.country", [
       ["code", "=", countryCode],
     ]);
 
@@ -136,10 +140,10 @@ class OdooService extends TransactionBaseService {
         email,
         city,
         street: address,
-        country_id: country_id[0],
+        country_id: countryId[0],
         name,
         country_code: countryCode,
-        zip
+        zip,
       });
     }
   }
@@ -172,7 +176,7 @@ class OdooService extends TransactionBaseService {
     };
   }
 
-  async getDeliveryOrder(pickingId) {
+  async getOrder(pickingId) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }

@@ -43,7 +43,7 @@ export default async function odooInventoryHandler({
     order.shipping_address.postal_code
   );
 
-  const delivery = (await odooService.getDeliveryOrder(
+  const deliveryOrder = (await odooService.getOrder(
     order.metadata.picking_id
   )) as any[];
   for (const item of returnData.items) {
@@ -51,7 +51,7 @@ export default async function odooInventoryHandler({
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity,
-      delivery[0].move_ids
+      deliveryOrder[0].move_ids
     );
     moves.push(result.move);
   }
@@ -62,7 +62,7 @@ export default async function odooInventoryHandler({
     1,
     partnerId,
 
-    `Return of ${delivery[0].name}`,
+    `Return of ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
 }

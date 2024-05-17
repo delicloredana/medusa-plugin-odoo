@@ -41,7 +41,7 @@ export default async function odooClaimCreatedHandler({
       claim.order.shipping_address.last_name,
     claim.shipping_address.postal_code
   );
-  const address = await odooService.createDeliveryAddress(
+  const deliveryAddress = await odooService.createDeliveryAddress(
     partnerId,
     claim.shipping_address.address_1,
     claim.shipping_address.city,
@@ -49,7 +49,7 @@ export default async function odooClaimCreatedHandler({
     claim.shipping_address.first_name + " " + claim.shipping_address.last_name,
     claim.shipping_address.postal_code
   );
-  const delivery = (await odooService.getDeliveryOrder(
+  const deliveryOrder = (await odooService.getOrder(
     order.metadata.picking_id
   )) as any[];
   const returnMoves = [];
@@ -58,7 +58,7 @@ export default async function odooClaimCreatedHandler({
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity,
-      delivery[0].move_ids
+      deliveryOrder[0].move_ids
     );
     returnMoves.push(result.move);
   }
@@ -69,8 +69,8 @@ export default async function odooClaimCreatedHandler({
     1,
     partnerId,
     claim.type === "replace"
-      ? `Claim for ${delivery[0].name}`
-      : `Return of ${delivery[0].name}`,
+      ? `Claim for ${deliveryOrder[0].name}`
+      : `Return of ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
   if (claim.type === "replace") {
@@ -90,8 +90,8 @@ export default async function odooClaimCreatedHandler({
       8,
       5,
       2,
-      address,
-      `Claim for ${delivery[0].name}`
+      deliveryAddress,
+      `Claim for ${deliveryOrder[0].name}`
     );
     await claimService.update(id, {
       metadata: { picking_id: pickingId },

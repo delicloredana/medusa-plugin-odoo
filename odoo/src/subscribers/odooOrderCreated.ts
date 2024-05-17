@@ -2,7 +2,6 @@ import {
   type SubscriberConfig,
   type SubscriberArgs,
   OrderService,
-  ReturnService,
 } from "@medusajs/medusa";
 import OdooService from "src/services/odoo";
 export default async function odooInventoryHandler({
@@ -33,7 +32,7 @@ export default async function odooInventoryHandler({
     name,
     order.shipping_address.postal_code
   );
-  const address = await odooService.createDeliveryAddress(
+  const deliveryAddress = await odooService.createDeliveryAddress(
     partnerId,
     order.shipping_address.address_1,
     order.shipping_address.city,
@@ -46,7 +45,13 @@ export default async function odooInventoryHandler({
     const move = await odooService.createMoves(product.id, item.quantity, 8, 5);
     moves.push(move);
   }
-  const pickingId = await odooService.createOrder(moves, 8, 5, 2, address);
+  const pickingId = await odooService.createOrder(
+    moves,
+    8,
+    5,
+    2,
+    deliveryAddress
+  );
   await orderService.update(order.id, {
     metadata: { picking_id: pickingId },
   });

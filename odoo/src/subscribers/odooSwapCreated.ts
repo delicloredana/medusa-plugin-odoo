@@ -49,7 +49,7 @@ export default async function odooSwapCreatedHandler({
       swap.cart.shipping_address.last_name,
     swap.shipping_address.postal_code
   );
-  const address = await odooService.createDeliveryAddress(
+  const deliveryAddress = await odooService.createDeliveryAddress(
     partnerId,
     swap.shipping_address.address_1,
     swap.shipping_address.city,
@@ -57,7 +57,7 @@ export default async function odooSwapCreatedHandler({
     swap.shipping_address.first_name + " " + swap.shipping_address.last_name,
     swap.shipping_address.postal_code
   );
-  const delivery = (await odooService.getDeliveryOrder(
+  const deliveryOrder = (await odooService.getOrder(
     order.metadata.picking_id
   )) as any[];
   const returnMoves = [];
@@ -66,7 +66,7 @@ export default async function odooSwapCreatedHandler({
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity,
-      delivery[0].move_ids
+      deliveryOrder[0].move_ids
     );
     returnMoves.push(result.move);
   }
@@ -76,7 +76,7 @@ export default async function odooSwapCreatedHandler({
     8,
     1,
     partnerId,
-    `Swap for ${delivery[0].name}`,
+    `Swap for ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
 
@@ -91,8 +91,8 @@ export default async function odooSwapCreatedHandler({
     8,
     5,
     2,
-    address,
-    `Swap for ${delivery[0].name}`
+    deliveryAddress,
+    `Swap for ${deliveryOrder[0].name}`
   );
   await swapService.update(id, {
     metadata: { picking_id: pickingId },
