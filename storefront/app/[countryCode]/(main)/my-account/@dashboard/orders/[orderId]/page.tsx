@@ -6,7 +6,12 @@ import { Icon } from '@/modules/common/ui/Icon';
 import { Heading } from '@/modules/common/ui/Heading';
 import { getCurrency } from '@/utils/prices';
 import { cookies } from 'next/headers';
-import { createCart, getCart, listRegions, retrieveOrder } from '@/lib/data';
+import {
+  createCart,
+  getCart,
+  listRegions,
+  retrieveOrderWithSwaps,
+} from '@/lib/data';
 import { formatDate } from '../page';
 import redTShirtt from '../../../../../../../public/images/content/red-t-shirt.jpg';
 import visa from '../../../../../../../public/images/content/visa.png';
@@ -24,7 +29,7 @@ const MyAccountOrderSinglePage = async ({
     : await createCart();
   const regions = await listRegions();
   const countries = regions?.flatMap((region: any) => region.countries);
-  const response = await retrieveOrder(orderId);
+  const response = await retrieveOrderWithSwaps(orderId);
   const order = response ? response[0] : undefined;
   const requestedSwaps = order?.swaps.filter((s) => s.confirmed_at === null);
   const items = order?.items;

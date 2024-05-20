@@ -190,13 +190,22 @@ export async function completeCart(cartId: string) {
 }
 
 // Order actions
-export const retrieveOrder = cache(async function (id: string, limit=200, offset=0) {
+export const retrieveOrderWithSwaps = cache(async function (id: string, limit=200, offset=0) {
   const headers = getMedusaHeaders(['order']);
 
   return medusaClient.customers
   .listOrders({ limit, offset, expand: "swaps,shipping_address,swaps.return_order,swaps.return_order.items,swaps.return_order.items.item,swaps.return_order.shipping_method", id:id}, headers)
   .then(({ orders }) => orders)
   .catch((err) => console.log(err));
+});
+
+export const retrieveOrder = cache(async function (id: string) {
+  const headers = getMedusaHeaders(['order']);
+
+  return medusaClient.orders
+    .retrieve(id, headers)
+    .then(({ order }) => order)
+    .catch((err) => console.log(err));
 });
 
 // Shipping actions
