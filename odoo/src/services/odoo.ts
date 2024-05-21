@@ -146,7 +146,11 @@ class OdooService extends TransactionBaseService {
       });
     }
   }
-  async createReturnOrder(moves, locationId, pickingId) {
+  async createReturnOrder(
+    moves: number[],
+    locationId: number,
+    pickingId: number
+  ) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
@@ -156,7 +160,7 @@ class OdooService extends TransactionBaseService {
       product_return_moves: moves,
     });
   }
-  async createReturnMoves(productId:number, quantity :number, moveIds) {
+  async createReturnMoves(productId: number, quantity: number) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }

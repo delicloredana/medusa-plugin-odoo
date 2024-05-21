@@ -65,8 +65,7 @@ export default async function odooSwapCreatedHandler({
     const product = (await odooService.getProduct(item.item.variant_id)) as any;
     const result = await odooService.createReturnMoves(
       product.id,
-      item.quantity,
-      deliveryOrder[0].move_ids
+      item.quantity
     );
     returnMoves.push(result.move);
   }

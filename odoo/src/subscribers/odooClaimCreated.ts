@@ -58,7 +58,6 @@ export default async function odooClaimCreatedHandler({
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity,
-      deliveryOrder[0].move_ids
     );
     returnMoves.push(result.move);
   }
