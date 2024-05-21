@@ -3,7 +3,7 @@ import express from "express";
 import loaders from "@medusajs/medusa/dist/loaders";
 import odoo from "odoo-await";
 import path from "path";
-const odooProductQuantity = async (): Promise<void> => {
+const odooProductPrice = async (): Promise<void> => {
   console.info("Starting loader...");
   const app = express();
   const directory = path.resolve(__dirname, "../../");
@@ -40,6 +40,6 @@ const odooProductQuantity = async (): Promise<void> => {
   process.exit(0);
 };
 
-odooProductQuantity();
+odooProductPrice();
 
-export default odooProductQuantity;
+export default odooProductPrice;
