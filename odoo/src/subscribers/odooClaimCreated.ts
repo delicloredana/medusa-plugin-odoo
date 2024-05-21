@@ -23,22 +23,22 @@ export default async function odooClaimCreatedHandler({
       "return_order",
       "return_order.items",
       "return_order.items.item",
-      "return_order.shipping_method",
-      "return_order.shipping_method.shipping_option",
       "order",
       "order.shipping_address",
       "shipping_address",
     ],
   });
   const order = await orderService.retrieve(claim.order_id);
+  const partnerName =
+    claim.order.shipping_address.first_name +
+    " " +
+    claim.order.shipping_address.last_name;
   const partnerId = await odooService.findPartner(
     order.email,
     claim.order.shipping_address.address_1,
     claim.order.shipping_address.city,
     claim.order.shipping_address.country_code,
-    claim.order.shipping_address.first_name +
-      " " +
-      claim.order.shipping_address.last_name,
+    partnerName,
     claim.shipping_address.postal_code
   );
   const deliveryAddress = await odooService.createDeliveryAddress(
@@ -46,18 +46,18 @@ export default async function odooClaimCreatedHandler({
     claim.shipping_address.address_1,
     claim.shipping_address.city,
     claim.shipping_address.country_code,
-    claim.shipping_address.first_name + " " + claim.shipping_address.last_name,
+    partnerName,
     claim.shipping_address.postal_code
   );
-  const deliveryOrder = (await odooService.getOrder(
+  const deliveryOrder = await odooService.getOrder(
     order.metadata.picking_id as number
-  )) as any[];
+  );
   const returnMoves = [];
   for (const item of claim.return_order.items) {
-    const product = (await odooService.getProduct(item.item.variant_id)) as any;
+    const product = await odooService.getProduct(item.item.variant_id);
     const result = await odooService.createReturnMoves(
       product.id,
-      item.quantity,
+      item.quantity
     );
     returnMoves.push(result.move);
   }
@@ -75,7 +75,7 @@ export default async function odooClaimCreatedHandler({
   if (claim.type === "replace") {
     const additionalMoves = [];
     for (const item of claim.additional_items) {
-      const product = (await odooService.getProduct(item.variant_id)) as any;
+      const product = await odooService.getProduct(item.variant_id);
       const move = await odooService.createMoves(
         product.id,
         item.quantity,

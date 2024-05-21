@@ -183,13 +183,13 @@ class OdooService extends TransactionBaseService {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
-    return await this.odooClient.read("stock.picking", [pickingId]);
+    return await this.odooClient.read<any>("stock.picking", [pickingId]);
   }
   async getProduct(externalId: string) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
-    return await this.odooClient.readByExternalId(externalId);
+    return await this.odooClient.readByExternalId<any>(externalId);
   }
 }
 

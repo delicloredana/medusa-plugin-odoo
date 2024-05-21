@@ -16,17 +16,9 @@ export default async function odooSwapCreatedHandler({
   const { id } = data;
 
   const swap = await swapService.retrieve(id, {
-    select: [
-      "order.display_id",
-      "order.currency_code",
-      "id",
-      "difference_due",
-      "cart.total",
-      "order_id",
-    ],
+    select: ["order.display_id", "order.currency_code", "id", "order_id"],
     relations: [
       "additional_items",
-      "order",
       "return_order",
       "return_order.items",
       "return_order.items.item",
@@ -39,14 +31,16 @@ export default async function odooSwapCreatedHandler({
   });
 
   const order = await orderService.retrieve(swap.order_id);
+  const partnerName =
+    swap.cart.shipping_address.first_name +
+    " " +
+    swap.cart.shipping_address.last_name;
   const partnerId = await odooService.findPartner(
     order.email,
     swap.cart.shipping_address.address_1,
     swap.cart.shipping_address.city,
     swap.cart.shipping_address.country_code,
-    swap.cart.shipping_address.first_name +
-      " " +
-      swap.cart.shipping_address.last_name,
+    partnerName,
     swap.shipping_address.postal_code
   );
   const deliveryAddress = await odooService.createDeliveryAddress(
@@ -54,15 +48,15 @@ export default async function odooSwapCreatedHandler({
     swap.shipping_address.address_1,
     swap.shipping_address.city,
     swap.shipping_address.country_code,
-    swap.shipping_address.first_name + " " + swap.shipping_address.last_name,
+    partnerName,
     swap.shipping_address.postal_code
   );
-  const deliveryOrder = (await odooService.getOrder(
+  const deliveryOrder = await odooService.getOrder(
     order.metadata.picking_id as number
-  )) as any[];
+  );
   const returnMoves = [];
   for (const item of swap.return_order.items) {
-    const product = (await odooService.getProduct(item.item.variant_id)) as any;
+    const product = await odooService.getProduct(item.item.variant_id);
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity
@@ -81,7 +75,7 @@ export default async function odooSwapCreatedHandler({
 
   const additionalMoves = [];
   for (const item of swap.additional_items) {
-    const product = (await odooService.getProduct(item.variant_id)) as any;
+    const product = await odooService.getProduct(item.variant_id);
     const move = await odooService.createMoves(product.id, item.quantity, 8, 5);
     additionalMoves.push(move);
   }

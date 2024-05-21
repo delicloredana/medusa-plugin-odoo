@@ -14,22 +14,16 @@ export default async function odooInventoryHandler({
   const { id } = data;
 
   const order = await orderService.retrieve(id, {
-    relations: [
-      "items",
-      "customer",
-      "shipping_address",
-      "shipping_methods",
-      "shipping_methods.shipping_option",
-    ],
+    relations: ["items", "shipping_address"],
   });
-  const name =
+  const partnerName =
     order.shipping_address.first_name + " " + order.shipping_address.last_name;
   const partnerId = await odooService.findPartner(
     order.email,
     order.shipping_address.address_1,
     order.shipping_address.city,
     order.shipping_address.country_code,
-    name,
+    partnerName,
     order.shipping_address.postal_code
   );
   const deliveryAddress = await odooService.createDeliveryAddress(
@@ -37,11 +31,11 @@ export default async function odooInventoryHandler({
     order.shipping_address.address_1,
     order.shipping_address.city,
     order.shipping_address.country_code,
-    name,
+    partnerName,
     order.shipping_address.postal_code
   );
   for (const item of order.items) {
-    const product = (await odooService.getProduct(item.variant_id)) as any;
+    const product = await odooService.getProduct(item.variant_id);
     const move = await odooService.createMoves(product.id, item.quantity, 8, 5);
     moves.push(move);
   }

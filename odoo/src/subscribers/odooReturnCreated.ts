@@ -17,37 +17,31 @@ export default async function odooInventoryHandler({
 
   const returnData = await returnService.retrieve(return_id, {
     relations: [
-      "order",
       "items",
-      "order",
       "items.item",
       "shipping_method",
       "shipping_method.shipping_option",
     ],
   });
   const order = await orderService.retrieve(id, {
-    relations: [
-      "items",
-      "customer",
-      "shipping_address",
-      "shipping_methods",
-      "shipping_methods.shipping_option",
-    ],
+    relations: ["items", "shipping_address"],
   });
+  const partnerName =
+    order.shipping_address.first_name + " " + order.shipping_address.last_name;
   const partnerId = await odooService.findPartner(
     order.email,
     order.shipping_address.address_1,
     order.shipping_address.city,
     order.shipping_address.country_code,
-    order.shipping_address.first_name + " " + order.shipping_address.last_name,
+    partnerName,
     order.shipping_address.postal_code
   );
 
-  const deliveryOrder = (await odooService.getOrder(
+  const deliveryOrder = await odooService.getOrder(
     order.metadata.picking_id as number
-  )) as any[];
+  );
   for (const item of returnData.items) {
-    const product = (await odooService.getProduct(item.item.variant_id)) as any;
+    const product = await odooService.getProduct(item.item.variant_id);
     const result = await odooService.createReturnMoves(
       product.id,
       item.quantity

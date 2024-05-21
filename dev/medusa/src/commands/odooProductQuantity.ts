@@ -23,7 +23,7 @@ const odooProductQuantity = async (): Promise<void> => {
   await odooClient.connect();
   for (const product of products) {
     for (const variant of product.variants) {
-      const odoProd = (await odooClient.readByExternalId(variant.id)) as any;
+      const odoProd = (await odooClient.readByExternalId<any>(variant.id))
       const newQ = await odooClient.create("stock.change.product.qty", [
         {
           new_quantity: variant.inventory_quantity,
