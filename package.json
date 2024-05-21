@@ -1,0 +1,29 @@
+{
+  "name": "medusa-plugin-reviews",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "dev/medusa",
+    "odoo",
+    "dev/storefront"
+  ],
+  "scripts": {
+    "start:medusa": "nodemon --watch \"odoo\" --ignore \"odoo/src\" --ignore \"odoo/thunder\" --spawn --exec \"npm start -w medusa\" --delay 2 --verbose",
+    "start": "concurrently -n \"build:odoo\" \"npm run build -w medusa-plugin-odoo-inventory && npm run build -w medusa && npm run build -w storefront\"  && concurrently -n \"start:medusa,watch:odoo\" \"npm run start:medusa\" \"npm run watch -w medusa-plugin-odoo-inventory\" \"npm run dev -w storefront\"   --timings --prefix \"[{name}] [{time}] =>\""
+  },
+  "dependencies": {
+    "@agilorunner/gitdeploy": "^2.4.0",
+    "@agilorunner/run": "^2.4.0",
+    "@medusajs/medusa-oas-cli": "file:.yalc/@medusajs/medusa-oas-cli",
+    "concurrently": "^8.2.2",
+    "execa": "^8.0.1",
+    "fs-extra": "^11.2.0",
+    "nodemon": "^3.0.1",
+    "openapi-filter": "^3.2.3",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.3.1",
+    "@types/fs-extra": "^11.0.4"
+  }
+}

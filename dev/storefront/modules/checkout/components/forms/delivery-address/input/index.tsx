@@ -2,7 +2,7 @@
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import React from 'react';
 import { Input } from '@/modules/common/ui/Input';
-import { ShippingAddress } from '../';
+import { ShippingAddress } from '..';
 
 interface FormInputProps {
   label: string;

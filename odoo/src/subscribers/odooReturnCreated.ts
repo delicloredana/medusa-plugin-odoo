@@ -44,7 +44,7 @@ export default async function odooInventoryHandler({
   );
 
   const deliveryOrder = (await odooService.getOrder(
-    order.metadata.picking_id
+    order.metadata.picking_id as number
   )) as any[];
   for (const item of returnData.items) {
     const product = (await odooService.getProduct(item.item.variant_id)) as any;

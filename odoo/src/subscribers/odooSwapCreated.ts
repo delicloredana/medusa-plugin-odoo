@@ -58,7 +58,7 @@ export default async function odooSwapCreatedHandler({
     swap.shipping_address.postal_code
   );
   const deliveryOrder = (await odooService.getOrder(
-    order.metadata.picking_id
+    order.metadata.picking_id as number
   )) as any[];
   const returnMoves = [];
   for (const item of swap.return_order.items) {

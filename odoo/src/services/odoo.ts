@@ -3,14 +3,13 @@ import Odoo from "odoo-await";
 type OdooType = Odoo & { uid?: number };
 class OdooService extends TransactionBaseService {
   protected odooClient: OdooType;
-
-  constructor(container) {
+  constructor(container, options) {
     super(container);
     this.odooClient = new Odoo({
-      baseUrl: process.env.ODOO_BASE_URL,
-      db: process.env.ODOO_DB,
-      username: process.env.ODOO_USERNAME,
-      password: process.env.ODOO_PASSWORD,
+      baseUrl: options.odooBaseUrl,
+      db: options.odooDB,
+      username: options.odooUsername,
+      password: options.odooPassword,
     });
   }
 
@@ -157,7 +156,7 @@ class OdooService extends TransactionBaseService {
       product_return_moves: moves,
     });
   }
-  async createReturnMoves(productId, quantity, moveIds) {
+  async createReturnMoves(productId:number, quantity :number, moveIds) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
@@ -176,7 +175,7 @@ class OdooService extends TransactionBaseService {
     };
   }
 
-  async getOrder(pickingId) {
+  async getOrder(pickingId: number) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
