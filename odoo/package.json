@@ -17,9 +17,7 @@
     "test": "jest --passWithNoTests src ",
     "build": "babel src --out-dir dist --ignore '**/__tests__','**/__mocks__' --extensions \".ts, .js \" && medusa-admin bundle",
     "watch": "babel -w src --out-dir dist --ignore '**/__tests__','**/__mocks__' --extensions \".ts, .js \"",
-    "release": "np",
-    "seed:quantity": "ts-node src/commands/odooProductQuantity.ts",
-    "seed:price": "ts-node src/commands/odooProductPrice.ts"
+    "release": "np"
   },
   "dependencies": {
     "odoo-await": "^3.4.1"

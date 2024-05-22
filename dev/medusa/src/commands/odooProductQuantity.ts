@@ -23,19 +23,23 @@ const odooProductQuantity = async (): Promise<void> => {
   await odooClient.connect();
   for (const product of products) {
     for (const variant of product.variants) {
-      const odoProd = (await odooClient.readByExternalId<any>(variant.id))
-      const newQ = await odooClient.create("stock.change.product.qty", [
-        {
-          new_quantity: variant.inventory_quantity,
-          product_id: odoProd.id,
-          product_tmpl_id: odoProd.id,
-        },
-      ]);
-      await odooClient.execute_kw(
-        "stock.change.product.qty",
-        "change_product_qty",
-        [[newQ]]
-      );
+      try {
+        const odoProd = await odooClient.readByExternalId<any>(variant.id);
+        const newQ = await odooClient.create("stock.change.product.qty", [
+          {
+            new_quantity: variant.inventory_quantity,
+            product_id: odoProd.id,
+            product_tmpl_id: odoProd.product_tmpl_id[0],
+          },
+        ]);
+        await odooClient.execute_kw(
+          "stock.change.product.qty",
+          "change_product_qty",
+          [[newQ]]
+        );
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
   process.exit(0);

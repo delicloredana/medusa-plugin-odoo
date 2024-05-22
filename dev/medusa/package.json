@@ -23,7 +23,8 @@
     "dev": "cross-env npm run build:server && medusa develop",
     "migrate": "medusa migrations run",
     "seed:quantity": "ts-node src/commands/odooProductQuantity.ts",
-    "seed:price": "ts-node src/commands/odooProductPrice.ts"
+    "seed:price": "ts-node src/commands/odooProductPrice.ts",
+    "seed:products": "ts-node src/commands/odooProductCreate.ts"
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.14",

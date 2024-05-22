@@ -32,9 +32,13 @@ const odooProductPrice = async (): Promise<void> => {
       const newPrice = variant.prices.find(
         (price) => price.currency_code === process.env.ODOO_CURRENCY_CODE
       );
-      await odooClient.updateByExternalId(variant.id, {
-        list_price: newPrice.amount / 100,
-      });
+      try {
+        await odooClient.updateByExternalId(variant.id, {
+          list_price: newPrice.amount / 100,
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
   process.exit(0);
