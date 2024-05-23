@@ -108,7 +108,7 @@ const SingleSwap = async ({
               {(swap.return_order.shipping_method.price / 100).toFixed(2)}
             </p>
           </li>{' '}
-          <Link href={`/${countryCode}/swap/${swap.cart_id}`}>
+          <Link href={`/${countryCode}/swap/${swap.cart_id}?step=address`}>
             <Button>Complete swap</Button>
           </Link>
         </ul>
