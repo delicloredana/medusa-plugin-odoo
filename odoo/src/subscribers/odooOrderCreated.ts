@@ -14,24 +14,33 @@ export default async function odooInventoryHandler({
   const { id } = data;
 
   const order = await orderService.retrieve(id, {
-    relations: ["items", "shipping_address"],
+    relations: [
+      "items",
+      "shipping_address",
+      "customer",
+      "customer.shipping_addresses",
+    ],
   });
-  const partnerName =
-    order.shipping_address.first_name + " " + order.shipping_address.last_name;
+
   const partnerId = await odooService.findPartner(
     order.email,
-    order.shipping_address.address_1,
-    order.shipping_address.city,
-    order.shipping_address.country_code,
-    partnerName,
-    order.shipping_address.postal_code
+    order.customer.shipping_addresses[0]?.address_1 ||
+      order.shipping_address.address_1,
+    order.customer.shipping_addresses[0]?.city || order.shipping_address.city,
+    order.customer.shipping_addresses[0]?.country_code ||
+      order.shipping_address.country_code,
+    order.customer.first_name
+      ? `${order.customer.first_name} ${order.customer.last_name}`
+      : `${order.shipping_address.first_name} ${order.shipping_address.last_name}`,
+    order.customer.shipping_addresses[0]?.postal_code ||
+      order.shipping_address.postal_code
   );
   const deliveryAddress = await odooService.createDeliveryAddress(
     partnerId,
     order.shipping_address.address_1,
     order.shipping_address.city,
     order.shipping_address.country_code,
-    partnerName,
+    `${order.shipping_address.first_name} ${order.shipping_address.last_name}`,
     order.shipping_address.postal_code
   );
   for (const item of order.items) {
