@@ -3,6 +3,7 @@ import {
   type SubscriberArgs,
   OrderService,
   ClaimService,
+  ReturnService,
 } from "@medusajs/medusa";
 import OdooService from "src/services/odoo";
 export default async function odooClaimCreatedHandler({
@@ -11,6 +12,7 @@ export default async function odooClaimCreatedHandler({
 }: SubscriberArgs<Record<string, any>>) {
   const orderService: OrderService = container.resolve("orderService");
   const claimService: ClaimService = container.resolve("claimService");
+  const returnService: ReturnService = container.resolve("returnService");
   const odooService: OdooService = container.resolve("odooService");
 
   const { id } = data;
@@ -61,7 +63,8 @@ export default async function odooClaimCreatedHandler({
     );
     returnMoves.push(result.move);
   }
-  await odooService.createOrder(
+  const returnPickingId = await odooService.createOrder(
+    claim.return_order.id,
     returnMoves,
     5,
     8,
@@ -72,6 +75,9 @@ export default async function odooClaimCreatedHandler({
       : `Return of ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
+  await returnService.update(claim.return_order.id, {
+    metadata: { picking_id: returnPickingId },
+  });
   if (claim.type === "replace") {
     const additionalMoves = [];
     for (const item of claim.additional_items) {
@@ -85,6 +91,7 @@ export default async function odooClaimCreatedHandler({
       additionalMoves.push(move);
     }
     const pickingId = await odooService.createOrder(
+      claim.id,
       additionalMoves,
       8,
       5,

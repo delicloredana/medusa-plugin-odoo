@@ -1,5 +1,6 @@
 import { TransactionBaseService } from "@medusajs/medusa";
 import Odoo from "odoo-await";
+
 type OdooType = Odoo & { uid?: number };
 class OdooService extends TransactionBaseService {
   protected odooClient: OdooType;
@@ -34,6 +35,7 @@ class OdooService extends TransactionBaseService {
     });
   }
   async createOrder(
+    id: string,
     moves: number[],
     locationId: number,
     locationDestId: number,
@@ -45,7 +47,7 @@ class OdooService extends TransactionBaseService {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
     }
-    return await this.odooClient.create("stock.picking", {
+    const pickingId = await this.odooClient.create("stock.picking", {
       location_id: locationId,
       location_dest_id: locationDestId,
       picking_type_id: pickingTypeId,
@@ -54,8 +56,19 @@ class OdooService extends TransactionBaseService {
       return_id: returnId,
       origin,
     });
+    await this.odooClient.createExternalId("stock.picking", pickingId, id);
+    return pickingId;
   }
-
+  async getExternalId(id: number, model: string) {
+    if (!this.odooClient.uid) {
+      await this.odooClient.connect();
+    }
+    const order = await this.odooClient.searchRead<any>("ir.model.data", {
+      res_id: id,
+      model,
+    });
+    return order[0].name;
+  }
   async cancelOrder(id: number) {
     if (!this.odooClient.uid) {
       await this.odooClient.connect();
@@ -159,6 +172,10 @@ class OdooService extends TransactionBaseService {
       picking_id: pickingId,
       product_return_moves: moves,
     });
+  }
+  async getMoves(ids:number[]){
+    const moves=await this.odooClient.read<any>("stock.move", ids)
+    return moves
   }
   async createReturnMoves(productId: number, quantity: number) {
     if (!this.odooClient.uid) {

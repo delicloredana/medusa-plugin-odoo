@@ -49,6 +49,7 @@ export default async function odooInventoryHandler({
     moves.push(move);
   }
   const pickingId = await odooService.createOrder(
+    id,
     moves,
     8,
     5,

@@ -57,7 +57,8 @@ export default async function odooInventoryHandler({
     );
     moves.push(result.move);
   }
-  await odooService.createOrder(
+  const pickingId = await odooService.createOrder(
+    return_id,
     moves,
     5,
     8,
@@ -67,6 +68,9 @@ export default async function odooInventoryHandler({
     `Return of ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
+  await returnService.update(return_id, {
+    metadata: { picking_id: pickingId },
+  });
 }
 
 export const config: SubscriberConfig = {

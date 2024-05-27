@@ -3,6 +3,7 @@ import {
   type SubscriberArgs,
   OrderService,
   SwapService,
+  ReturnService,
 } from "@medusajs/medusa";
 import OdooService from "src/services/odoo";
 export default async function odooSwapCreatedHandler({
@@ -11,6 +12,7 @@ export default async function odooSwapCreatedHandler({
 }: SubscriberArgs<Record<string, any>>) {
   const orderService: OrderService = container.resolve("orderService");
   const swapService: SwapService = container.resolve("swapService");
+  const returnService: ReturnService = container.resolve("returnService");
   const odooService: OdooService = container.resolve("odooService");
 
   const { id } = data;
@@ -63,7 +65,8 @@ export default async function odooSwapCreatedHandler({
     );
     returnMoves.push(result.move);
   }
-  await odooService.createOrder(
+  const returnPickingId = await odooService.createOrder(
+    swap.return_order.id,
     returnMoves,
     5,
     8,
@@ -72,6 +75,9 @@ export default async function odooSwapCreatedHandler({
     `Swap for ${deliveryOrder[0].name}`,
     order.metadata?.picking_id as number
   );
+  await returnService.update(swap.return_order.id, {
+    metadata: { picking_id: returnPickingId },
+  });
 
   const additionalMoves = [];
   for (const item of swap.additional_items) {
@@ -80,6 +86,7 @@ export default async function odooSwapCreatedHandler({
     additionalMoves.push(move);
   }
   const pickingId = await odooService.createOrder(
+    swap.id,
     additionalMoves,
     8,
     5,
